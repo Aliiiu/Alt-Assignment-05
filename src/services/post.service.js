@@ -38,13 +38,26 @@ export const updatePost = async (id, postContent, userId) => {
 		.exec();
 };
 
-export const getAllPosts = async () => {
-	return await PostModel.find()
+export const getAllPosts = async (page, limit) => {
+	const skip = (page - 1) * limit;
+	const totalPosts = await PostModel.countDocuments(); // Count the total posts in the database
+	const totalPages = Math.ceil(totalPosts / limit); // Calculate the total number of pages
+
+	const posts = await PostModel.find()
+		.skip(skip)
+		.limit(limit)
 		.populate({
 			path: 'user',
 			select: 'name email updatedAt createdAt',
 		})
 		.exec();
+
+	return {
+		totalPages,
+		currentPage: page,
+		totalPosts,
+		posts,
+	};
 };
 
 export const getAllPost = async (id) => {

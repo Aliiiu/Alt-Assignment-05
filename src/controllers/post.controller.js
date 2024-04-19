@@ -1,19 +1,27 @@
 import * as postService from '../services/post.service.js';
 
 export const getAllPosts = (req, res) => {
+	let page = Number(req.query.page) || 1;
+	page = page < 1 ? 1 : page;
+	let limit = Number(req.query.limit) || 2; // Set a default limit
+	limit = limit < 1 ? 2 : limit;
+
 	postService
-		.getAllPosts()
-		.then((posts) => {
+		.getAllPosts(page, limit)
+		.then((result) => {
 			res.send({
 				message: 'All Posts',
-				data: posts,
+				totalPages: result.totalPages,
+				currentPage: result.currentPage,
+				totalPosts: result.totalPosts,
+				data: result.posts,
 			});
 		})
 		.catch((err) => {
 			console.log(err);
-			res.status(err.status || 500);
-			res.send({
-				message: err.message,
+			res.status(500).send({
+				message: 'Error retrieving posts',
+				error: err.message,
 			});
 		});
 };
